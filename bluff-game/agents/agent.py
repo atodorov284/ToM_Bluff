@@ -1,7 +1,9 @@
+from core.card_classes.hand import Hand
+
 class Agent:
-    def __init__(self, name, strategy):
+    def __init__(self, name, strategy = 0):
         self.name = name
-        self.hand = []
+        self.hand = Hand()
         self.strategy = strategy
         
     def play_cards(self):
