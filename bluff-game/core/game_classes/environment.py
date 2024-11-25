@@ -34,9 +34,6 @@ class BluffEnv(AECEnv):
         """Initialize the Bluff environment with the specified number of players."""
         self.num_players = num_players
         self.render_mode = render_mode
-        
-        self._first_action_played = False
-
         self.possible_agents = [f"player_{i}" for i in range(num_players)]
         self.agent_name_mapping = {agent: i for i, agent in enumerate(self.possible_agents)}
 
@@ -76,6 +73,7 @@ class BluffEnv(AECEnv):
         self.central_pile = deck[self.num_players * cards_per_player:]
         
         self._first_action_played = False
+        self._cards_played_from_rank = 0
 
         # Game state variables
         self.current_rank = 0  # Start with "ACE"
@@ -105,7 +103,7 @@ class BluffEnv(AECEnv):
         """Take a step in the game."""
         agent = self.agent_selection
 
-        if action not in [ACTION_PLAY_1, ACTION_PLAY_2, ACTION_PLAY_3, ACTION_PLAY_4, ACTION_CHALLENGE]:
+        if action not in ALL_ACTIONS:
             # Handle invalid actions later. For now, raise an error.
             raise ValueError(f"Invalid action: {action}")
 
@@ -143,6 +141,11 @@ class BluffEnv(AECEnv):
         self.central_pile.extend(cards_to_play)
         self.current_claim = cards_to_play
         self.last_played_agent = agent
+        self._cards_played_from_rank += number_of_cards
+        
+        if self._cards_played_from_rank >= 4:
+            self._cards_played_from_rank = 0
+            self.current_rank = (self.current_rank + 1) % len(RANKS)
 
         # For each card in cards to play, remove it from the hand and cards to play
         for card in cards_to_play:

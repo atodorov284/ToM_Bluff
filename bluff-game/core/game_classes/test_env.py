@@ -34,4 +34,4 @@ def play_bluff_game(num_players=2):
 
 
 
-play_bluff_game(num_players=2)
+play_bluff_game(num_players=3)
