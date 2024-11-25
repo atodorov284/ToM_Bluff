@@ -89,10 +89,7 @@ class BluffEnv(AECEnv):
         self.infos = {agent: {} for agent in self.agents}
 
         self._agent_selector = agent_selector(self.agents)
-        if not self._first_action_played:
-            self.agent_selection = 'player_0'
-        else:
-            self.agent_selection = self._agent_selector.next()
+        self.agent_selection = self._agent_selector.next()
         
                 
     def observe(self, agent: str) -> dict:
@@ -118,13 +115,17 @@ class BluffEnv(AECEnv):
         elif action == ACTION_CHALLENGE:
             # Agent challenges the last play
             self._handle_challenge(agent)
+            
+        if self.render_mode == "human":
+            print("\n--- Current Game State ---")
+            print('Action:', action)
+            self.render()
 
         # Move to the next player
         if not self.terminations[agent]:
             self.agent_selection = self._agent_selector.next()
 
-        if self.render_mode == "human":
-            self.render()
+        
             
     def _handle_play(self, agent: str) -> None:
         """Handle the play action."""
@@ -178,7 +179,6 @@ class BluffEnv(AECEnv):
         
     def render(self):
         """Render the current game state."""
-        print("\n--- Current Game State ---")
         print(f"Current turn: {self.agent_selection}")
         print(f"Current observation for {self.agent_selection}: {self.observe(self.agent_selection)}")
         print(f"Central pile: {len(self.central_pile)} cards")
