@@ -66,7 +66,7 @@ def evaluate_against_random(policy_file, num_episodes=1000):
                 break
         
         # Print progress
-        if (episode + 1) % 100 == 0:
+        if (episode + 1) % 1000 == 0:
             print(f"\nEpisode {episode + 1}")
             print(f"Q-Learning Agent wins: {qlearn_wins}")
             print(f"Random Agent wins: {random_wins}")

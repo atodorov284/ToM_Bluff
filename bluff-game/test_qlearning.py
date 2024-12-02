@@ -8,7 +8,7 @@ import numpy as np
 
 def play_bluff_game(num_players=2, episodes=100):
     # Initialize agents
-    agent_0 = QLearningAgent(learning_rate=0.4, discount_factor=1, epsilon=0.1)  # removed discount
+    agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)  # removed discount
     agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)  # removed discount
     
     # Track wins for each agent (not position)
@@ -111,7 +111,7 @@ def play_bluff_game(num_players=2, episodes=100):
     return agent_0, agent_1, wins_agent_0, wins_agent_1
 
 if __name__ == "__main__":
-    agent1, agent2, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=25000)
+    agent1, agent2, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=1000)
     print("\nFinal Results:")
     print(f"Agent 0 wins: {wins_0}")
     print(f"Agent 1 wins: {wins_1}")
