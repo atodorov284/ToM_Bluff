@@ -1,5 +1,7 @@
-from agents.agent import BaseAgent
 import numpy as np
+
+from agents.agent import BaseAgent
+
 
 class RandomAgent(BaseAgent):
     def select_action(self, observation, mask):

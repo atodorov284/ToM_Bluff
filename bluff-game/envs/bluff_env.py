@@ -1,30 +1,23 @@
 import functools
 import random
 from typing import Tuple
-from gymnasium.spaces import Discrete, MultiDiscrete
+
 import numpy as np
+from gymnasium.spaces import Discrete, MultiDiscrete
 from pettingzoo import AECEnv
 from pettingzoo.utils import agent_selector, wrappers
 
 # CONSTANTS
 RANKS = ["ACE", "JACK", "QUEEN", "KING"]
 NUM_CARDS_PER_RANK = 4
-ACTION_CHALLENGE = 0
-ACTION_PLAY_1 = 1
-ACTION_PLAY_2 = 2
-ACTION_PLAY_3 = 3
-ACTION_PLAY_4 = 4
+ACTION_CHALLENGE = [0, 0, 0, 0]  # Not necessary but not to hardcode it
 
-ALL_ACTIONS = [
-    ACTION_CHALLENGE,
-    ACTION_PLAY_1,
-    ACTION_PLAY_2,
-    ACTION_PLAY_3,
-    ACTION_PLAY_4,
-]
+ACTION_SPACE = MultiDiscrete([5, 5, 5, 5])
+
+NUM_ACTIONS = 70
 
 
-def env(num_players=2, render_mode=None) -> AECEnv:
+def env(num_players: int = 2, render_mode: str = None) -> AECEnv:
     """Wrapper for the Bluff environment."""
     internal_render_mode = render_mode if render_mode != "ansi" else "human"
     base_env = BluffEnv(num_players=num_players, render_mode=internal_render_mode)
@@ -38,7 +31,7 @@ def env(num_players=2, render_mode=None) -> AECEnv:
 class BluffEnv(AECEnv):
     metadata = {"render_modes": ["human"], "name": "bluff_v1"}
 
-    def __init__(self, num_players: int = 2, render_mode=None) -> None:
+    def __init__(self, num_players: int = 2, render_mode: str = None) -> None:
         """Initialize the Bluff environment with the specified number of players."""
         self.num_players = num_players
         self.render_mode = render_mode
@@ -47,24 +40,21 @@ class BluffEnv(AECEnv):
             agent: i for i, agent in enumerate(self.possible_agents)
         }
 
-        # Define action and observation spaces
-        self._action_spaces = {
-            agent: Discrete(len(ALL_ACTIONS)) for agent in self.possible_agents
-        }  # Play or challenge
-        self._observation_spaces = {
-            agent: MultiDiscrete([len(RANKS), NUM_CARDS_PER_RANK])
-            for agent in self.possible_agents
-        }
+        self._action_spaces = {agent: ACTION_SPACE for agent in self.possible_agents}
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: str) -> Discrete:
         """
         Return the observation space for the specified agent.
         """
-        return self._observation_spaces[agent]
+        # We never need the observation space
+        raise NotImplementedError
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: str) -> Discrete:
+        """
+        Return the action space for the specified agent.
+        """
         return self._action_spaces[agent]
 
     def reset(self, seed: int = None, options: dict = None) -> Tuple:
@@ -109,14 +99,14 @@ class BluffEnv(AECEnv):
             [0, 1, 1, 1, 1], dtype=np.int8
         )
 
-    def _list_to_frequency_vector(self, hand_list):
+    def _list_to_frequency_vector(self, hand_list: list) -> list:
         """Convert a list of cards to a frequency vector."""
         freq_vector = [0] * len(RANKS)
         for card in hand_list:
             freq_vector[RANKS.index(card)] += 1
         return freq_vector
 
-    def _frequency_vector_to_card_list(self, freq_vector):
+    def _frequency_vector_to_card_list(self, freq_vector: list) -> list:
         """Convert a frequency vector back to a list of cards."""
         card_list = []
         for i, count in enumerate(freq_vector):
@@ -124,29 +114,41 @@ class BluffEnv(AECEnv):
         return card_list
 
     def get_initial_observation(self) -> dict:
+        """
+        Return the initial observation for the specified agent.
+        """
         return (self.observe(self.agent_selection), self.infos[self.agent_selection])
 
     def observe(self, agent: str) -> dict:
         """Return the current observation for the specified agent."""
+        # Only one other agent for now, change later for 3 agents.
+        other_agent = self.agents.where(lambda x: x != agent)[0]
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),
             "hand": self.player_hands[agent],
+            "opponent_hand_size": len(self.player_hands[other_agent]),
         }
+
+    def _validate_action(self, action: str) -> None:
+        """Validate the action."""
+        if np.any((action < 0) | (action > 4)):
+            raise ValueError("Invalid action: must be between 0 and 4.")
+        if np.sum(action) > 4:
+            raise ValueError("Invalid action: more than 4 cards played.")
+
+        # Check if action is valid for the game
 
     def step(self, action: str) -> Tuple[dict, dict, dict, dict]:
         """Take a step in the game."""
         agent = self.agent_selection
 
-        if action not in ALL_ACTIONS:
-            # Handle invalid actions later. For now, raise an error.
-            raise ValueError(f"Invalid action: {action}")
+        self._validate_action(action)
 
-        if action in [ACTION_PLAY_1, ACTION_PLAY_2, ACTION_PLAY_3, ACTION_PLAY_4]:
-            self._handle_play(agent, action)
-
-        elif action == ACTION_CHALLENGE:
+        if action == ACTION_CHALLENGE:
             self._handle_challenge(agent)
+        else:
+            self._handle_play(agent, action)
 
         if self.render_mode == "human":
             print("\n--- Current Game State ---")
@@ -157,6 +159,7 @@ class BluffEnv(AECEnv):
             self.agent_selection
         )
 
+        # maybe remove this if we dont use it!
         self._cumulative_rewards[agent] += self.rewards[agent]
 
         if not self.terminations[agent]:
@@ -165,6 +168,7 @@ class BluffEnv(AECEnv):
         self._last_step = self.last()
 
     def last(self):
+        """Return the last step information."""
         return (
             self.observe(self.agent_selection),
             self.rewards[self.agent_selection],
@@ -174,30 +178,43 @@ class BluffEnv(AECEnv):
         )
 
     def _get_action_mask(self, agent: str) -> list:
-        """Return a binary mask of valid actions for the given agent."""
-        mask = np.zeros(len(ALL_ACTIONS), dtype=np.int8)
+        """Return the valid actions for the given agent."""
+        cards_left_to_play = 4 - self._cards_played_from_rank
+        current_agent_hand = self.player_hands[agent]
+        cards_left_to_play = np.min(cards_left_to_play, sum(current_agent_hand))
+        mask = []
 
-        mask[ACTION_CHALLENGE] = int(self.last_played_agent is not None)
+        num_of_aces_in_hand = current_agent_hand[0]
+        num_of_jacks_in_hand = current_agent_hand[1]
+        num_of_queens_in_hand = current_agent_hand[2]
+        num_of_kings_in_hand = current_agent_hand[4]
+        a, b, c, d = np.indices(
+            (
+                min(cards_left_to_play + 1, num_of_aces_in_hand + 1),
+                min(cards_left_to_play + 1, num_of_jacks_in_hand + 1),
+                min(cards_left_to_play + 1, num_of_queens_in_hand + 1),
+                min(cards_left_to_play + 1, num_of_kings_in_hand + 1),
+            )
+        )
+        combinations = np.stack([a.ravel(), b.ravel(), c.ravel(), d.ravel()], axis=-1)
+        valid_combinations = combinations[
+            np.sum(combinations, axis=1) <= cards_left_to_play
+        ]
+        if self.last_played_agent is None:
+            mask.remove([0, 0, 0, 0])
 
-        hand_size = sum(self.player_hands[agent])
-        mask[ACTION_PLAY_1] = int(hand_size >= 1)
-        mask[ACTION_PLAY_2] = int(hand_size >= 2)
-        mask[ACTION_PLAY_3] = int(hand_size >= 3)
-        mask[ACTION_PLAY_4] = int(hand_size >= 4)
+        mask = valid_combinations.tolist()
         return mask
 
-    def _handle_play(self, agent: str, number_of_cards: int) -> None:
+    def _handle_play(self, agent: str, action: list) -> None:
         """Handle the play action."""
         hand = self.player_hands[agent]
-        hand_list = self._frequency_vector_to_card_list(hand)
-        number_of_cards = min(number_of_cards, len(hand_list))
-        
-        # Sample cards to play
-        cards_to_play = random.sample(hand_list, number_of_cards)
 
         # Update frequency vector
-        for card in cards_to_play:
-            hand[RANKS.index(card)] -= 1
+        hand = hand - action
+
+        number_of_cards = np.sum(action)
+        cards_to_play = self._frequency_vector_to_card_list(action)
 
         # Add cards to the central pile
         self.central_pile.extend(cards_to_play)
@@ -211,10 +228,7 @@ class BluffEnv(AECEnv):
 
         self.rewards[agent] = number_of_cards
 
-        # Check for victory
-        self._check_victory(agent)
-
-    def _check_victory(self, agent: str) -> None:
+    def check_victory(self, agent: str) -> None:
         """
         Check if the agent has won the game.
         """
@@ -225,6 +239,8 @@ class BluffEnv(AECEnv):
                 if other_agent != agent:
                     self.terminations[other_agent] = True
                     self.rewards[other_agent] = -100
+            return True
+        return False
 
     def _handle_challenge(self, agent: str) -> None:
         """Handle the challenge action."""
@@ -265,7 +281,6 @@ class BluffEnv(AECEnv):
         previous_agent = self.last_played_agent
         self.last_played_agent = None
         self.infos[previous_agent]["action_mask"] = self._get_action_mask(agent)
-
 
     def render(self) -> None:
         """Render the current game state."""
