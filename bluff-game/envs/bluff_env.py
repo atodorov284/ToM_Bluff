@@ -95,8 +95,8 @@ class BluffEnv(AECEnv):
         self._agent_selector = agent_selector(self.agents)
         self.agent_selection = self._agent_selector.next()
 
-        self.infos[self.agent_selection]["action_mask"] = np.array(
-            [0, 1, 1, 1, 1], dtype=np.int8
+        self.infos[self.agent_selection]["action_mask"] = self._get_action_mask(
+            self.agent_selection
         )
 
     def _list_to_frequency_vector(self, hand_list: list) -> list:
@@ -122,7 +122,9 @@ class BluffEnv(AECEnv):
     def observe(self, agent: str) -> dict:
         """Return the current observation for the specified agent."""
         # Only one other agent for now, change later for 3 agents.
-        other_agent = self.agents.where(lambda x: x != agent)[0]
+        other_agent = [diff_agent for diff_agent in self.agents if diff_agent != agent][
+            0
+        ]
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),
@@ -167,7 +169,7 @@ class BluffEnv(AECEnv):
 
         self._last_step = self.last()
 
-    def last(self):
+    def last(self) -> Tuple:
         """Return the last step information."""
         return (
             self.observe(self.agent_selection),
@@ -181,13 +183,13 @@ class BluffEnv(AECEnv):
         """Return the valid actions for the given agent."""
         cards_left_to_play = 4 - self._cards_played_from_rank
         current_agent_hand = self.player_hands[agent]
-        cards_left_to_play = np.min(cards_left_to_play, sum(current_agent_hand))
+        cards_left_to_play = min(cards_left_to_play, sum(current_agent_hand))
         mask = []
 
         num_of_aces_in_hand = current_agent_hand[0]
         num_of_jacks_in_hand = current_agent_hand[1]
         num_of_queens_in_hand = current_agent_hand[2]
-        num_of_kings_in_hand = current_agent_hand[4]
+        num_of_kings_in_hand = current_agent_hand[3]
         a, b, c, d = np.indices(
             (
                 min(cards_left_to_play + 1, num_of_aces_in_hand + 1),
@@ -200,10 +202,11 @@ class BluffEnv(AECEnv):
         valid_combinations = combinations[
             np.sum(combinations, axis=1) <= cards_left_to_play
         ]
+        mask = valid_combinations.tolist()
+
         if self.last_played_agent is None:
             mask.remove([0, 0, 0, 0])
 
-        mask = valid_combinations.tolist()
         return mask
 
     def _handle_play(self, agent: str, action: list) -> None:
