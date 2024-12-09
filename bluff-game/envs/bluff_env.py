@@ -228,8 +228,12 @@ class BluffEnv(AECEnv):
         self.current_claim = cards_to_play
         self.last_played_agent = agent
         self._cards_played_from_rank += number_of_cards
+        print(f"Cards played from rank: {self._cards_played_from_rank}")
+        
+        if self._cards_played_from_rank > 4:
+            raise ValueError("Too many cards played from the same rank.")
 
-        if self._cards_played_from_rank >= 4:
+        if self._cards_played_from_rank == 4:
             self._cards_played_from_rank = 0
             self.current_rank = (self.current_rank + 1) % len(RANKS)
 
@@ -285,6 +289,7 @@ class BluffEnv(AECEnv):
         # Reset the central pile and move to the next rank
         self.central_pile = []
         self.current_rank = (self.current_rank + 1) % len(RANKS)
+        self._cards_played_from_rank = 0
 
         # Handle action masks so that you cant challenge after challenge
         previous_agent = self.last_played_agent

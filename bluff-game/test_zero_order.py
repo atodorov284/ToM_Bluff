@@ -12,13 +12,13 @@ from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 
 
-def play_bluff_game(num_players: int = 2, episodes: int = 1000, seed: int = 4242) -> None:
+def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -> None:
     """Play a game of Bluff with the specified number of players."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    game_env = env(num_players=num_players, render_mode="huma")
+    game_env = env(num_players=num_players, render_mode="human")
     
     
     #agent_0 = QLearningAgent(
@@ -37,11 +37,17 @@ def play_bluff_game(num_players: int = 2, episodes: int = 1000, seed: int = 4242
     # )
     
     
-    agent_1 = RandomAgent()
-    
-    agent_0 = QLearningAgent(
+    agent_1 = QLearningAgent(
         learning_rate=0.1, discount_factor=1, epsilon=0.1
     )
+        
+    agent_0 = RandomAgent()
+    
+    # agent_1 = QLearningAgent(
+    #     learning_rate=0.1, discount_factor=1, epsilon=0.05
+    # )
+    
+    
 
     wins_agent_0 = 0
     wins_agent_1 = 0
@@ -81,7 +87,9 @@ def play_bluff_game(num_players: int = 2, episodes: int = 1000, seed: int = 4242
 
                 if winning_agent == agent_0:
                     wins_agent_0 += 1
+                    print("Agent 0 wins!")
                 else:
+                    print("Agent 1 wins!")
                     wins_agent_1 += 1
                 break
             
@@ -101,11 +109,14 @@ def play_bluff_game(num_players: int = 2, episodes: int = 1000, seed: int = 4242
 
             obs = next_obs
             
-        if episode % 10 == 0:
+        
+            
+        if episode % 100 == 0:
             print(f"Episode {episode}")
             print(f"Agent 0 wins: {wins_agent_0}")
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 0 played as player_0: {not should_swap}")
+            
             
 
 
