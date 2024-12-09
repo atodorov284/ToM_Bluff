@@ -2,29 +2,46 @@ import os
 import random
 import sys
 
+import torch
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
+from agents.dqn import ApproxQLearningAgent
 from agents.random_agent import RandomAgent
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 
 
-def play_bluff_game(num_players: int = 2, episodes: int = 10000, seed: int = 4242) -> None:
+def play_bluff_game(num_players: int = 2, episodes: int = 1000, seed: int = 4242) -> None:
     """Play a game of Bluff with the specified number of players."""
     random.seed(seed)
     np.random.seed(seed)
+    torch.manual_seed(seed)
 
     game_env = env(num_players=num_players, render_mode="huma")
     
     
+    #agent_0 = QLearningAgent(
+    #    learning_rate=0.1, discount_factor=1, epsilon=0.1
+    #)
+    
+    state_dim = 7
+    action_dim = 625
+
+    # agent_0 = ApproxQLearningAgent(
+    #     state_dim=state_dim,
+    #     action_dim=action_dim,
+    #     learning_rate=0.001,
+    #     discount_factor=0.95,
+    #     epsilon=0.1,
+    # )
+    
+    
+    agent_1 = RandomAgent()
+    
     agent_0 = QLearningAgent(
         learning_rate=0.1, discount_factor=1, epsilon=0.1
     )
-    # agent_1 = QLearningAgent(
-    #     learning_rate=0.1, discount_factor=1, epsilon=0.1
-    # )
-    
-    agent_1 = RandomAgent()
 
     wins_agent_0 = 0
     wins_agent_1 = 0
@@ -74,6 +91,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 10000, seed: int = 424
                 agent.update(prev_rewards[current_agent], obs)
 
             action = agent.select_action(obs, mask)
+            # print(f"Agent {current_agent} plays {action}")
             
             game_env.step(action)
             next_obs, reward, termination, truncation, info = game_env.last()
@@ -83,11 +101,12 @@ def play_bluff_game(num_players: int = 2, episodes: int = 10000, seed: int = 424
 
             obs = next_obs
             
-        if episode % 100 == 0:
+        if episode % 10 == 0:
             print(f"Episode {episode}")
             print(f"Agent 0 wins: {wins_agent_0}")
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 0 played as player_0: {not should_swap}")
+            
 
 
 if __name__ == "__main__":

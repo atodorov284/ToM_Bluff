@@ -98,6 +98,8 @@ class BluffEnv(AECEnv):
         self.infos[self.agent_selection]["action_mask"] = self._get_action_mask(
             self.agent_selection
         )
+        for agent in self.agents:
+            self.infos[agent]["cards_other_agent_played"] = 0
 
     def _list_to_frequency_vector(self, hand_list: list) -> list:
         """Convert a list of cards to a frequency vector."""
@@ -122,10 +124,15 @@ class BluffEnv(AECEnv):
     def observe(self, agent: str) -> dict:
         """Return the current observation for the specified agent."""
         # Only one other agent for now, change later for 3 agents.
+        other_agent = [diff_agent for diff_agent in self.agents if diff_agent != agent][
+            0
+        ]
+        how_many_last_played = self.infos[other_agent]["cards_other_agent_played"]
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),
             "hand": np.array(self.player_hands[agent]).tolist(),
+            "cards_other_agent_played": how_many_last_played,
         }
 
     def _validate_action(self, action: str) -> None:
@@ -154,6 +161,8 @@ class BluffEnv(AECEnv):
 
         if not self.terminations[agent]:
             self.agent_selection = self._agent_selector.next()
+            if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
+                self.agent_selection = self._agent_selector.next()
             
         self.infos[self.agent_selection]["action_mask"] = self._get_action_mask(
             self.agent_selection
@@ -211,6 +220,7 @@ class BluffEnv(AECEnv):
         self.player_hands[agent] -= action
 
         number_of_cards = np.sum(action)
+        self.infos[agent]["cards_other_agent_played"] = number_of_cards
         cards_to_play = self._frequency_vector_to_card_list(action)
 
         # Add cards to the central pile
@@ -243,6 +253,8 @@ class BluffEnv(AECEnv):
         """Handle the challenge action."""
         if self.last_played_agent is None:
             raise RuntimeError("No play to challenge.")
+        
+        self.infos[agent]["cards_other_agent_played"] = 0
 
         # Check if the last play was truthful
         is_truthful = all(
@@ -258,7 +270,7 @@ class BluffEnv(AECEnv):
             self.player_hands[agent] = self._list_to_frequency_vector(
                 challenger_hand_list
             )
-            self.rewards[agent] = -len(self.central_pile) * 10
+            self.rewards[agent] = -len(self.central_pile)
         else:
             # Last player takes all cards in the central pile
             last_player_hand_list = self._frequency_vector_to_card_list(
@@ -268,7 +280,7 @@ class BluffEnv(AECEnv):
             self.player_hands[self.last_played_agent] = self._list_to_frequency_vector(
                 last_player_hand_list
             )
-            self.rewards[agent] = len(self.central_pile) * 10
+            self.rewards[agent] = len(self.central_pile)
 
         # Reset the central pile and move to the next rank
         self.central_pile = []

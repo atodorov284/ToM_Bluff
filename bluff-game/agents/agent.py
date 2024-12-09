@@ -39,9 +39,11 @@ class BaseAgent(ABC):
 
         # Get the current rank (already discrete 0-3)
         current_rank = observation["current_rank"]
+        
+        cards_last_played = observation["cards_other_agent_played"]
 
         # Return state tuple
-        return (*hand_freq, discrete_pile, current_rank)
+        return (*hand_freq, discrete_pile, current_rank, cards_last_played)
     
     def _action_to_index(self, action: list) -> int:
         """Convert action to index in Q-table."""
