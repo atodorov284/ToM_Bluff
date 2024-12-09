@@ -55,6 +55,6 @@ def numpy_test():
 
 
 # Count total valid combinations
-result = numpy_test()
-print(f"Total number of valid combinations: {result}")
-print(f"Total number of valid combinations: {len(result)}")
+#result = numpy_test()
+#print(f"Total number of valid combinations: {result}")
+#print(f"Total number of valid combinations: {len(result)}")

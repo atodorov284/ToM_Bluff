@@ -1,10 +1,13 @@
+from copy import deepcopy
+
 import numpy as np
 
 from .agent import BaseAgent
 
 
 class QLearningAgent(BaseAgent):
-    def __init__(self, learning_rate=0.1, discount_factor=0.95, epsilon=0.1):
+    def __init__(self, learning_rate: int=0.1, discount_factor: int=0.95, epsilon: int=0.1) -> None:
+        """Initialize the Q-Learning Agent."""
         self.lr = learning_rate
         self.gamma = discount_factor
         self.epsilon = epsilon
@@ -12,67 +15,48 @@ class QLearningAgent(BaseAgent):
         self.last_state = None
         self.last_action = None
 
-    def _discretize_state(self, observation):
-        """Convert the observation dictionary into a hashable state tuple."""
-        # Extract the hand frequency vector
-        hand_freq = tuple(observation["hand"])  # Already in the format we want
+    
 
-        # Discretize pile size into 3 categories
-        pile_size = observation["central_pile_size"]
-        if pile_size <= 4:
-            discrete_pile = 0  # small
-        elif pile_size <= 8:
-            discrete_pile = 1  # medium
-        else:
-            discrete_pile = 2  # large
-
-        # Get the current rank (already discrete 0-3)
-        current_rank = observation["current_rank"]
-
-        # Return state tuple
-        return (*hand_freq, discrete_pile, current_rank)
-
-    def select_action(self, observation, mask):
+    def select_action(self, observation: dict, mask: list) -> list:
         """Select action using epsilon-greedy policy."""
         # Convert observation to discrete state
         state = self._discretize_state(observation)
 
         # Initialize state in Q-table if not seen before
         if state not in self.q_table:
-            self.q_table[state] = np.zeros(5)  # 5 possible actions
-
-        # Ensure mask is a numpy array and at least 1d
-        mask = np.atleast_1d(mask)
+            self.q_table[state] = np.zeros(625)
 
         # Epsilon-greedy action selection
         if np.random.random() < self.epsilon:
-            valid_actions = np.where(mask == 1)[0]
-            if len(valid_actions) == 0:
-                valid_actions = np.arange(5)
-            action = np.random.choice(valid_actions)
+            mask_indices = [self._action_to_index(valid_action) for valid_action in mask]
+            random_action_index = np.random.choice(mask_indices)
+            action = self._index_to_action(random_action_index)
+            
         else:
-            q_values = self.q_table[state].copy()
-            q_values[mask == 0] = -np.inf
-            action = np.argmax(q_values)
+            q_values = deepcopy(self.q_table[state])
+            mask_indices = [self._action_to_index(valid_action) for valid_action in mask]
+            
+            invalid_actions = [i for i in range(625) if i not in mask_indices]
+            q_values[invalid_actions] = -np.inf
+            action = self._index_to_action(np.argmax(q_values))
+            
 
-        # Store state for delayed update
         self.last_state = state
         self.last_action = action
 
         return action
 
-    def update(self, reward, next_observation=None):
+    def update(self, reward: float, next_observation: dict=None) -> None:
         """Update Q-values using the Q-learning update rule."""
         if self.last_state is None or self.last_action is None:
             return
 
         if next_observation is None:
-            # Terminal state
             next_max_q = 0
         else:
             next_state = self._discretize_state(next_observation)
             if next_state not in self.q_table:
-                self.q_table[next_state] = np.zeros(5)
+                self.q_table[next_state] = np.zeros(625)
             next_max_q = np.max(self.q_table[next_state])
 
         # Q-learning update
