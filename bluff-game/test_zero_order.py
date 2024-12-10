@@ -2,11 +2,9 @@ import os
 import random
 import sys
 
-import torch
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
-from agents.random_agent import RandomAgent
+from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
@@ -16,7 +14,6 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
     """Play a game of Bluff with the specified number of players."""
     random.seed(seed)
     np.random.seed(seed)
-    torch.manual_seed(seed)
 
     game_env = env(num_players=num_players)
      

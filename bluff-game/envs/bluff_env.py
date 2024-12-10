@@ -318,18 +318,3 @@ class BluffEnv(AECEnv):
         
         print(f"Central pile: {len(self.central_pile)} cards")
         print(f"Reward: {self.rewards[self.agent_selection]}")
-        
-        
-        # print("\n--- Current Game State ---")
-        # print("Action:", action)
-        
-        # print(f"Current turn: {self.agent_selection}")
-        # print(
-        #     f"Current observation for {self.agent_selection}: {self.observe(self.agent_selection)}"
-        # )
-        # print("Last cards played: ", self.current_claim)
-        # print(f"Reward: {self.rewards[self.agent_selection]}")
-        # print(f"Central pile: {len(self.central_pile)} cards")
-        # print(f"Current rank: {RANKS[self.current_rank]}")
-        # for agent in self.agents:
-        #     print(f"{agent}: {sum(self.player_hands[agent])} cards")

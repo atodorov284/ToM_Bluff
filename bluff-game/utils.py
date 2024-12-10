@@ -1,4 +1,4 @@
-def print_strategy_analysis(q_table):
+def print_strategy_analysis(q_table: dict) -> None:
     """Print strategy distribution analysis of the Q-table."""
     # Analyze preference for different types of actions
     action_type_counts = {
