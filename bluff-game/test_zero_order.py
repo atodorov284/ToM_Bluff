@@ -18,15 +18,13 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    game_env = env(num_players=num_players, render_mode="human")
+    game_env = env(num_players=num_players)
     
     
     #agent_0 = QLearningAgent(
     #    learning_rate=0.1, discount_factor=1, epsilon=0.1
     #)
-    
-    state_dim = 7
-    action_dim = 625
+
 
     # agent_0 = ApproxQLearningAgent(
     #     state_dim=state_dim,
@@ -38,10 +36,12 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
     
     
     agent_1 = QLearningAgent(
-        learning_rate=0.1, discount_factor=1, epsilon=0.1
+        learning_rate=0.1, discount_factor=1, epsilon=0.25
     )
         
-    agent_0 = RandomAgent()
+    agent_0 = QLearningAgent(
+        learning_rate=0.5, discount_factor=1, epsilon=0.1
+    )
     
     # agent_1 = QLearningAgent(
     #     learning_rate=0.1, discount_factor=1, epsilon=0.05
@@ -54,7 +54,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
     
     for episode in range(episodes):
         
-        should_swap = 0
+        should_swap = np.random.random() < 0.5
 
         agents = {
             "player_0": agent_1 if should_swap else agent_0,
@@ -87,9 +87,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
 
                 if winning_agent == agent_0:
                     wins_agent_0 += 1
-                    print("Agent 0 wins!")
                 else:
-                    print("Agent 1 wins!")
                     wins_agent_1 += 1
                 break
             
@@ -109,16 +107,21 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
 
             obs = next_obs
             
-        
             
-        if episode % 100 == 0:
+        if episode % 1000 == 0:
             print(f"Episode {episode}")
             print(f"Agent 0 wins: {wins_agent_0}")
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 0 played as player_0: {not should_swap}")
+        
             
-            
+    return agent_0, agent_1, wins_agent_0, wins_agent_1  
 
 
 if __name__ == "__main__":
-    play_bluff_game()
+    agent1, agent2, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=10000)
+    print("\nFinal Results:")
+    print(f"Agent 0 wins: {wins_0}")
+    print(f"Agent 1 wins: {wins_1}")
+    print("\nFinal Q-values:")
+    print("Agent 1:", agent2.q_table, "states")

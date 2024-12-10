@@ -228,7 +228,19 @@ class BluffEnv(AECEnv):
         self.current_claim = cards_to_play
         self.last_played_agent = agent
         self._cards_played_from_rank += number_of_cards
-        print(f"Cards played from rank: {self._cards_played_from_rank}")
+        #print(f"Cards played from rank: {self._cards_played_from_rank}")
+        
+        # Calculate reward
+        is_bluff = not all(card == RANKS[self.current_rank] for card in cards_to_play)
+        if is_bluff:
+            self.rewards[agent] = number_of_cards * 3  # Reward for successful bluff
+        else:
+            self.rewards[agent] = number_of_cards * 2  # Reward for truthful play
+            
+        # Add relative hand size component
+        other_agent = [a for a in self.agents if a != agent][0]
+        hand_diff = sum(self.player_hands[other_agent]) - sum(self.player_hands[agent])
+        self.rewards[agent] += hand_diff * 0.5
         
         if self._cards_played_from_rank > 4:
             raise ValueError("Too many cards played from the same rank.")
@@ -236,8 +248,6 @@ class BluffEnv(AECEnv):
         if self._cards_played_from_rank == 4:
             self._cards_played_from_rank = 0
             self.current_rank = (self.current_rank + 1) % len(RANKS)
-
-        self.rewards[agent] = number_of_cards
 
     def check_victory(self, agent: str) -> None:
         """
@@ -249,7 +259,7 @@ class BluffEnv(AECEnv):
             for other_agent in self.agents:
                 if other_agent != agent:
                     self.terminations[other_agent] = True
-                    self.rewards[other_agent] = -100
+                    self.rewards[other_agent] = -200
             return True
         return False
 
