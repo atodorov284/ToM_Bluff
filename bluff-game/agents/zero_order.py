@@ -21,8 +21,20 @@ class QLearningAgent(BaseAgent):
         
         cards_of_curr_rank = hand_freq[current_rank]
         other_cards = sum(hand_freq) - cards_of_curr_rank
+
+        num_cards_other_agent_played = observation["cards_other_agent_played"]
+
+        pile_size = observation["central_pile_size"]
+
+        # discretize pile size
+        if pile_size < 3:
+            discrete_pile = 0
+        elif pile_size > 3 and pile_size < 7:
+            discrete_pile = 1
+        else:
+            discrete_pile = 2
         
-        return (cards_of_curr_rank, other_cards, current_rank)
+        return (cards_of_curr_rank, other_cards, current_rank, num_cards_other_agent_played, discrete_pile)
 
     def _convert_action_to_full(self, action: int, hand_freq: list) -> list:
         """Convert action number to full action format.
@@ -62,7 +74,7 @@ class QLearningAgent(BaseAgent):
                 cards_to_use = min(count, cards_needed)
                 full_action[rank] = cards_to_use
                 cards_needed -= cards_to_use
-                
+
         return full_action
 
     def _get_valid_actions(self, mask: list, hand_freq: list) -> list:

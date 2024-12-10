@@ -84,6 +84,7 @@ class BluffEnv(AECEnv):
         self.last_played_agent = None
         self._last_step = None
         self.current_player_index = 0
+        self._is_truthful = None
 
         self.agents = self.possible_agents[:]
         self.rewards = {agent: 0 for agent in self.agents}
@@ -148,13 +149,13 @@ class BluffEnv(AECEnv):
 
         self._validate_action(action)
 
+        if self.render_mode == "human":
+            self.render(action)
+
         if np.array_equal(action, ACTION_CHALLENGE):
             self._handle_challenge(agent)
         else:
             self._handle_play(agent, action)
-
-        if self.render_mode == "human":
-            self.render(action)
 
         # maybe remove this if we dont use it!
         self._cumulative_rewards[agent] += self.rewards[agent]
@@ -228,19 +229,7 @@ class BluffEnv(AECEnv):
         self.current_claim = cards_to_play
         self.last_played_agent = agent
         self._cards_played_from_rank += number_of_cards
-        #print(f"Cards played from rank: {self._cards_played_from_rank}")
-        
-        # Calculate reward
-        is_bluff = not all(card == RANKS[self.current_rank] for card in cards_to_play)
-        if is_bluff:
-            self.rewards[agent] = number_of_cards * 3  # Reward for successful bluff
-        else:
-            self.rewards[agent] = number_of_cards * 2  # Reward for truthful play
-            
-        # Add relative hand size component
-        other_agent = [a for a in self.agents if a != agent][0]
-        hand_diff = sum(self.player_hands[other_agent]) - sum(self.player_hands[agent])
-        self.rewards[agent] += hand_diff * 0.5
+        # print(f"Cards played from rank: {self._cards_played_from_rank}")
         
         if self._cards_played_from_rank > 4:
             raise ValueError("Too many cards played from the same rank.")
@@ -248,6 +237,10 @@ class BluffEnv(AECEnv):
         if self._cards_played_from_rank == 4:
             self._cards_played_from_rank = 0
             self.current_rank = (self.current_rank + 1) % len(RANKS)
+        
+        # give agent rewards based on how many cards they played
+        self.rewards[agent] = number_of_cards
+
 
     def check_victory(self, agent: str) -> None:
         """
@@ -259,7 +252,7 @@ class BluffEnv(AECEnv):
             for other_agent in self.agents:
                 if other_agent != agent:
                     self.terminations[other_agent] = True
-                    self.rewards[other_agent] = -200
+                    self.rewards[other_agent] = -100
             return True
         return False
 
@@ -318,7 +311,8 @@ class BluffEnv(AECEnv):
         else: 
             print(f"Player {self.agent_selection} challenges.")
             print(f"The other player was truthful: {self._is_truthful}")
-            
+        
+        print(f"Cards from current rank played so far: {self._cards_played_from_rank}")
         for agent in self.agents:
             print(f"{agent}: {sum(self.player_hands[agent])} cards")
         
