@@ -1,7 +1,7 @@
 # **Bluff-ToM: Exploring Theory of Mind in the Game of Bluff**
 
 ## **Project Overview**
-This project is part of a Hybrid Intelligence course focused on implementing and analyzing theory of mind (ToM) agents. The objective is to study how different levels of ToM reasoning affect gameplay strategies and outcomes in the card game *Bluff*. By simulating agents with varying levels of ToM (zero-order, first-order, and second-order), we aim to evaluate their performance under different experimental setups.
+This focuses on implementing and analyzing theory of mind (ToM) agents. The objective is to study how different levels of ToM reasoning affect gameplay strategies and outcomes in the card game *Bluff*. By simulating agents with varying levels of ToM (zero-order, first-order, and second-order), we aim to evaluate their performance under different experimental setups.
 
 The project involves:
 - Implementing the game of *Bluff*.
@@ -50,28 +50,5 @@ To study the role of theory of mind in gameplay, the following experimental setu
 
 4. **Human-Agent Interaction**  
    Human players compete against zero-order and first-order agents. This setup collects data on how ToM agents perform against real-world strategies.
-
----
-```plaintext
-bluff_game/
-├── agents/
-│   ├── __init__.py
-│   ├── agent.py                  # Generic Agent class
-├── strategies/
-│   ├── __init__.py
-│   ├── strategy.py               # Abstract Strategy interface
-│   ├── zero_order_strategy.py    # Zero-Order Strategy implementation
-│   ├── first_order_strategy.py   # First-Order Strategy implementation
-│   ├── second_order_strategy.py  # Second-Order Strategy implementation
-│   ├── human_strategy.py         # Human Strategy implementation
-├── core/
-│   ├── __init__.py
-│   ├── game_manager.py           # GameManager class and game logic
-│   ├── deck.py                   # Deck class for managing cards
-│   ├── hand.py                   # Hand class for managing player hands
-│   ├── card.py                   # Card class for individual cards
-├── main.py                       # Entry point to run the game
-├── README.md                     # Project overview and instructions
-├── requirements.txt              # Python dependencies
 
 

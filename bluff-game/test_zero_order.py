@@ -2,59 +2,35 @@ import os
 import random
 import sys
 
-import torch
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
-from agents.dqn import ApproxQLearningAgent
-from agents.random_agent import RandomAgent
+from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
+from utils import print_strategy_analysis
 
 
-def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -> None:
+def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:
     """Play a game of Bluff with the specified number of players."""
     random.seed(seed)
     np.random.seed(seed)
-    torch.manual_seed(seed)
 
-    game_env = env(num_players=num_players, render_mode="human")
-    
-    
-    #agent_0 = QLearningAgent(
-    #    learning_rate=0.1, discount_factor=1, epsilon=0.1
-    #)
-    
-    state_dim = 7
-    action_dim = 625
-
-    # agent_0 = ApproxQLearningAgent(
-    #     state_dim=state_dim,
-    #     action_dim=action_dim,
-    #     learning_rate=0.001,
-    #     discount_factor=0.95,
-    #     epsilon=0.1,
-    # )
-    
-    
+    game_env = env(num_players=num_players)
+     
     agent_1 = QLearningAgent(
         learning_rate=0.1, discount_factor=1, epsilon=0.1
     )
         
-    agent_0 = RandomAgent()
-    
-    # agent_1 = QLearningAgent(
-    #     learning_rate=0.1, discount_factor=1, epsilon=0.05
-    # )
-    
-    
+    agent_0 = QLearningAgent(
+        learning_rate=0.1, discount_factor=1, epsilon=0.1
+    )
 
     wins_agent_0 = 0
     wins_agent_1 = 0
     
     for episode in range(episodes):
         
-        should_swap = 0
+        should_swap = random.random() < 0.5
 
         agents = {
             "player_0": agent_1 if should_swap else agent_0,
@@ -87,9 +63,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
 
                 if winning_agent == agent_0:
                     wins_agent_0 += 1
-                    print("Agent 0 wins!")
                 else:
-                    print("Agent 1 wins!")
                     wins_agent_1 += 1
                 break
             
@@ -109,16 +83,28 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 4242) -
 
             obs = next_obs
             
-        
             
-        if episode % 100 == 0:
+        if episode % 10 == 0:
             print(f"Episode {episode}")
             print(f"Agent 0 wins: {wins_agent_0}")
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 0 played as player_0: {not should_swap}")
+        
             
-            
+    return agent_0, agent_1, wins_agent_0, wins_agent_1  
 
 
 if __name__ == "__main__":
-    play_bluff_game()
+    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=200)
+    print("\nFinal Results:")
+    print(f"Agent 0 wins: {wins_0}")
+    print(f"Agent 1 wins: {wins_1}")
+    print(f"\nWin Rate Agent 1: {(wins_1 / (wins_0 + wins_1)) * 100:.1f}%")
+    
+    # Print Q-table analysis for Agent 0
+    print_strategy_analysis(agent0.q_table)
+    
+    # Print Q-table analysis for Agent 1
+    print_strategy_analysis(agent1.q_table)
+
+
