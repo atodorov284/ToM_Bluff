@@ -67,9 +67,11 @@ class BluffEnv(AECEnv):
 
         # Assign cards to players put the rest in the central pile
         self.player_hands = {
-            agent: np.array(self._list_to_frequency_vector(
-                deck[i * cards_per_player : (i + 1) * cards_per_player]
-            ))
+            agent: np.array(
+                self._list_to_frequency_vector(
+                    deck[i * cards_per_player : (i + 1) * cards_per_player]
+                )
+            )
             for i, agent in enumerate(self.possible_agents)
         }
         self.central_pile = deck[self.num_players * cards_per_player :]
@@ -143,9 +145,8 @@ class BluffEnv(AECEnv):
 
     def step(self, action: str) -> Tuple[dict, dict, dict, dict]:
         """Take a step in the game."""
-        
+
         agent = self.agent_selection
-        
 
         self._validate_action(action)
 
@@ -164,7 +165,7 @@ class BluffEnv(AECEnv):
             self.agent_selection = self._agent_selector.next()
             if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
                 self.agent_selection = self._agent_selector.next()
-            
+
         self.infos[self.agent_selection]["action_mask"] = self._get_action_mask(
             self.agent_selection
         )
@@ -205,13 +206,17 @@ class BluffEnv(AECEnv):
                     min(cards_left_to_play + 1, num_of_kings_in_hand + 1),
                 )
             )
-            combinations = np.stack([a.ravel(), b.ravel(), c.ravel(), d.ravel()], axis=-1)
+            combinations = np.stack(
+                [a.ravel(), b.ravel(), c.ravel(), d.ravel()], axis=-1
+            )
             valid_combinations = combinations[
                 np.sum(combinations, axis=1) <= cards_left_to_play
             ]
 
             if self.last_played_agent is None:
-                valid_combinations = np.delete(valid_combinations, ACTION_CHALLENGE, axis=0)
+                valid_combinations = np.delete(
+                    valid_combinations, ACTION_CHALLENGE, axis=0
+                )
 
         return valid_combinations
 
@@ -230,17 +235,16 @@ class BluffEnv(AECEnv):
         self.last_played_agent = agent
         self._cards_played_from_rank += number_of_cards
         # print(f"Cards played from rank: {self._cards_played_from_rank}")
-        
+
         if self._cards_played_from_rank > 4:
             raise ValueError("Too many cards played from the same rank.")
 
         if self._cards_played_from_rank == 4:
             self._cards_played_from_rank = 0
             self.current_rank = (self.current_rank + 1) % len(RANKS)
-        
+
         # give agent rewards based on how many cards they played
         self.rewards[agent] = number_of_cards
-
 
     def check_victory(self, agent: str) -> None:
         """
@@ -260,14 +264,14 @@ class BluffEnv(AECEnv):
         """Handle the challenge action."""
         if self.last_played_agent is None:
             raise RuntimeError("No play to challenge.")
-        
+
         self.infos[agent]["cards_other_agent_played"] = 0
 
         # Check if the last play was truthful
         is_truthful = all(
             card == RANKS[self.current_rank] for card in self.current_claim
         )
-        
+
         if is_truthful:
             # Challenger takes all cards in the central pile
             challenger_hand_list = self._frequency_vector_to_card_list(
@@ -298,7 +302,7 @@ class BluffEnv(AECEnv):
         previous_agent = self.last_played_agent
         self.last_played_agent = None
         self.infos[previous_agent]["action_mask"] = self._get_action_mask(agent)
-        
+
         self._is_truthful = is_truthful
 
     def render(self, action: list) -> None:
@@ -307,14 +311,16 @@ class BluffEnv(AECEnv):
         cards_played = self._frequency_vector_to_card_list(action)
         print("\n")
         if len(cards_played) != 0:
-            print(f"Player {self.agent_selection} plays {cards_played}, claiming they are {current_card_from_rank}.")
-        else: 
+            print(
+                f"Player {self.agent_selection} plays {cards_played}, claiming they are {current_card_from_rank}."
+            )
+        else:
             print(f"Player {self.agent_selection} challenges.")
             print(f"The other player was truthful: {self._is_truthful}")
-        
+
         print(f"Cards from current rank played so far: {self._cards_played_from_rank}")
         for agent in self.agents:
             print(f"{agent}: {sum(self.player_hands[agent])} cards")
-        
+
         print(f"Central pile: {len(self.central_pile)} cards")
         print(f"Reward: {self.rewards[self.agent_selection]}")

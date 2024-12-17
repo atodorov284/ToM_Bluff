@@ -11,6 +11,6 @@ class RandomAgent(BaseAgent):
         action = self._index_to_action(random_action_index)
         return action
 
-    def update(self, reward: float, next_observation: dict=None) -> None:
+    def update(self, reward: float, next_observation: dict = None) -> None:
         """Random agent doesn't learn, so this is a no-op."""
         pass

@@ -22,7 +22,7 @@ class BaseAgent(ABC):
             reward: The reward received after pulling the arm.
         """
         pass
-    
+
     def _discretize_state(self, observation: dict) -> tuple:
         """Convert the observation dictionary into a hashable state tuple."""
         # Extract the hand frequency vector
@@ -39,12 +39,12 @@ class BaseAgent(ABC):
 
         # Get the current rank (already discrete 0-3)
         current_rank = observation["current_rank"]
-        
+
         cards_last_played = observation["cards_other_agent_played"]
 
         # Return state tuple
         return (*hand_freq, discrete_pile, current_rank, cards_last_played)
-    
+
     def _action_to_index(self, action: list) -> int:
         """Convert action to index in Q-table."""
         return action[0] * 125 + action[1] * 25 + action[2] * 5 + action[3]
