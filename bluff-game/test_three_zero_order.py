@@ -4,10 +4,11 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
-from agents.first_order import FirstOrderAgent
 from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
+from utils import print_strategy_analysis
+
 
 def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> None:
     """Play a game of Bluff with the specified number of players."""
@@ -16,7 +17,7 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_1 = RandomAgent()  # QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
+    agent_1 = QLearningAgent(learning_rate=0.3, discount_factor=1, epsilon=0.01)
     agent_2 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
     agent_3 = QLearningAgent(learning_rate=0.15, discount_factor=1, epsilon=0.15)
     
@@ -25,13 +26,16 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
     wins_agent_3 = 0
     
     for episode in range(episodes):
-        agents = {
-            "player_0": agent_1,
-            "player_1": agent_2,
-            "player_2": agent_3,
-        }
         
-        # np.random.shuffle(list(agents.keys()))
+        agents = [agent_1, agent_2, agent_3]
+        
+        players = ["player_0", "player_1", "player_2"]
+        
+        np.random.shuffle(agents)
+                
+        agents = dict(zip(players, agents))
+                
+        
 
         game_env.reset()
         obs, info = game_env.get_initial_observation()
@@ -83,14 +87,25 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 
             obs = next_obs
             
-        if episode % 10 == 0:
+        if episode % 500 == 0:
             print(f"Episode {episode}")
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 2 wins: {wins_agent_2}")
             print(f"Agent 3 wins: {wins_agent_3}")
+            
+    return agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3
 
 if __name__ == "__main__":
     np.random.seed(1)
     random.seed(1)
-    play_bluff_game(num_players=3, episodes=2000)
+    agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3 = play_bluff_game(num_players=3, episodes=10000)
+    
+    print(f"Agent 1 wins: {wins_agent_1}")
+    print(f"Agent 2 wins: {wins_agent_2}")
+    print(f"Agent 3 wins: {wins_agent_3}")
+    
+    print_strategy_analysis(agent_1.q_table)
+    print_strategy_analysis(agent_2.q_table)
+    print_strategy_analysis(agent_3.q_table)
+    
     

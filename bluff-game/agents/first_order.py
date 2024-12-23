@@ -18,7 +18,6 @@ class FirstOrderAgent(BaseAgent):
         self.last_action = None
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
-        opponent_model = QLearningAgent(learning_rate, discount_factor, epsilon)
 
     def select_action(self, observation: dict, mask: list):
         """
@@ -37,27 +36,5 @@ class FirstOrderAgent(BaseAgent):
 
         pass
 
-    def _estimate_opponent_state(self, observation: dict) -> list:
-        """
-        reset estimate of opponent state whenever we play challenge or central pile size is 0, as then we know exactly what the opponent is holding. 
-        """
-        pass
-
     def update(self, reward: float, next_observation: dict = None) -> None:
         pass
-
-    def _update_opponent_model(self, reward: float, next_observation: dict) -> list:
-        pass
-
-    def _select_opponent_action(self, observation: dict, mask: list) -> list:
-        """Predict opponent's next action using the opponent model."""
-        # Create opponent observation using our estimates
-        opponent_obs = {
-            "current_rank": observation["current_rank"],
-            "central_pile_size": observation["central_pile_size"],
-            "hand": None, # TODO implement this!!
-            "cards_other_agent_played": sum(observation["hand"])
-        }
-        
-        return self.opponent_model.select_action(opponent_obs, mask)
-
