@@ -22,6 +22,8 @@ class FirstOrderAgent(BaseAgent):
         self.last_action = None
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
+        
+        self._challenging_belief = 0.5
 
     def estimate_opponent_action(self, observation: dict) -> int:
         """Estimate the opponent's most likely action based on observation."""
@@ -67,13 +69,15 @@ class FirstOrderAgent(BaseAgent):
 
         # Estimate opponent's most likely action
         opponent_action = self.estimate_opponent_action(observation)
-        if opponent_action == 0 and self.ACTION_CHALLENGE in valid_actions:
-            return self.ACTION_CHALLENGE
+        
 
         if np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
         else:
             q_values = deepcopy(self.q_table[state])
+            if opponent_action == 0 and self.ACTION_CHALLENGE in valid_actions:
+                q_values[0] *= (1 + self._challenging_belief)
+            
             invalid_actions = [
                 i for i in range(self.NUM_ACTIONS) if i not in valid_actions
             ]
@@ -100,3 +104,13 @@ class FirstOrderAgent(BaseAgent):
         current_q = self.q_table[self.last_state][self.last_action]
         new_q = current_q + self.lr * (reward + self.gamma * next_max_q - current_q)
         self.q_table[self.last_state][self.last_action] = new_q
+        if self.last_action == 0:  # Challenge action
+            
+            if reward > 0:
+                self._challenging_belief = (1 - self.lr) * self._challenging_belief + self.lr
+            else:
+                
+                self._challenging_belief = (1 - self.lr) * self._challenging_belief
+                
+        # print(self._challenging_belief)
+                

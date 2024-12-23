@@ -160,8 +160,8 @@ class BluffEnv(AECEnv):
         if self.render_mode == "human":
             self.render(action)
 
-        # maybe remove this if we dont use it!
-        self._cumulative_rewards[agent] += self.rewards[agent]
+        # THIS ACTUALLY NEEDS TO BE HERE DON'T TOUCH
+        self._cumulative_rewards[agent] = self.rewards[agent]
 
         if not self.terminations[agent]:
             # Iterate agent selection once in any case
@@ -294,7 +294,7 @@ class BluffEnv(AECEnv):
             self.player_hands[agent] = self._list_to_frequency_vector(
                 challenger_hand_list
             )
-            self.rewards[agent] = -len(self.central_pile)
+            self.rewards[agent] = len(self.central_pile)
         else:
             # Last player takes all cards in the central pile
             last_player_hand_list = self._frequency_vector_to_card_list(
