@@ -105,12 +105,11 @@ class FirstOrderAgent(BaseAgent):
         new_q = current_q + self.lr * (reward + self.gamma * next_max_q - current_q)
         self.q_table[self.last_state][self.last_action] = new_q
         if self.last_action == 0:  # Challenge action
-            
             if reward > 0:
                 self._challenging_belief = (1 - self.lr) * self._challenging_belief + self.lr
             else:
                 
-                self._challenging_belief = (1 - self.lr) * self._challenging_belief
+                self._challenging_belief = self.lr * self._challenging_belief
+        print(reward)
                 
-        # print(self._challenging_belief)
-                
+                                
