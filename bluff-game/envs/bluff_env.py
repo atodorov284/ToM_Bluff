@@ -127,10 +127,8 @@ class BluffEnv(AECEnv):
     def observe(self, agent: str) -> dict:
         """Return the current observation for the specified agent."""
         # Only one other agent for now, change later for 3 agents.
-        other_agent = [diff_agent for diff_agent in self.agents if diff_agent != agent][
-            0
-        ]
-        how_many_last_played = self.infos[other_agent]["cards_other_agent_played"]
+        previous_agent = self.last_played_agent
+        how_many_last_played = 0 if previous_agent is None else self.infos[previous_agent]["cards_other_agent_played"]
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),
@@ -150,21 +148,36 @@ class BluffEnv(AECEnv):
 
         self._validate_action(action)
 
-        if self.render_mode == "human":
-            self.render(action)
+        
 
         if np.array_equal(action, ACTION_CHALLENGE):
             self._handle_challenge(agent)
         else:
             self._handle_play(agent, action)
+            
+        if self.render_mode == "human":
+            self.render(action)
 
         # maybe remove this if we dont use it!
         self._cumulative_rewards[agent] += self.rewards[agent]
 
         if not self.terminations[agent]:
+            
+            # Iterate agent selection once in any case
+                
             self.agent_selection = self._agent_selector.next()
+            
+            # If challenger wins, they play again, so skip everyone internally
+            
             if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
-                self.agent_selection = self._agent_selector.next()
+                for _ in range(self.num_players - 1):
+                    self.agent_selection = self._agent_selector.next()
+            
+            # LEGACY: This was the code for 2 agents
+            
+            # self.agent_selection = self._agent_selector.next()
+            # if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
+            #     self.agent_selection = self._agent_selector.next()
 
         self.infos[self.agent_selection]["action_mask"] = self._get_action_mask(
             self.agent_selection
@@ -184,10 +197,8 @@ class BluffEnv(AECEnv):
 
     def _get_action_mask(self, agent: str) -> list:
         """Return the valid actions for the given agent."""
-        other_agent = [diff_agent for diff_agent in self.agents if diff_agent != agent][
-            0
-        ]
-        if sum(self.player_hands[other_agent]) == 0:
+        previous_agent = self.last_played_agent
+        if previous_agent and sum(self.player_hands[previous_agent]) == 0:
             valid_combinations = np.array([ACTION_CHALLENGE])
         else:
             cards_left_to_play = 4 - self._cards_played_from_rank
@@ -268,9 +279,13 @@ class BluffEnv(AECEnv):
         self.infos[agent]["cards_other_agent_played"] = 0
 
         # Check if the last play was truthful
+        print(self.current_claim, self.current_rank)
+        
         is_truthful = all(
             card == RANKS[self.current_rank] for card in self.current_claim
         )
+        
+        print(self.current_claim, self.current_rank, is_truthful)
 
         if is_truthful:
             # Challenger takes all cards in the central pile
