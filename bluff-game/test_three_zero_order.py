@@ -14,11 +14,11 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
     random.seed(seed)
     np.random.seed(seed)
 
-    game_env = env(num_players=num_players, render_mode="human")
+    game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
+    agent_1 = RandomAgent()  # QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
     agent_2 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
-    agent_3 = QLearningAgent(learning_rate=0.15, discount_factor=1, epsilon=0.1)
+    agent_3 = QLearningAgent(learning_rate=0.15, discount_factor=1, epsilon=0.15)
     
     wins_agent_1 = 0
     wins_agent_2 = 0
@@ -92,5 +92,5 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 if __name__ == "__main__":
     np.random.seed(1)
     random.seed(1)
-    play_bluff_game(num_players=3, episodes=1)
+    play_bluff_game(num_players=3, episodes=2000)
     

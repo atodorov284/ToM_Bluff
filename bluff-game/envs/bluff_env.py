@@ -279,14 +279,11 @@ class BluffEnv(AECEnv):
         self.infos[agent]["cards_other_agent_played"] = 0
 
         # Check if the last play was truthful
-        print(self.current_claim, self.current_rank)
         
         is_truthful = all(
             card == RANKS[self.current_rank] for card in self.current_claim
         )
         
-        print(self.current_claim, self.current_rank, is_truthful)
-
         if is_truthful:
             # Challenger takes all cards in the central pile
             challenger_hand_list = self._frequency_vector_to_card_list(

@@ -16,11 +16,11 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
     random.seed(seed)
     np.random.seed(seed)
 
-    game_env = env(num_players=num_players)
+    game_env = env(num_players=num_players, render_mode="human")
 
     agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
 
-    agent_0 = FirstOrderAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
+    agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.1)
 
     wins_agent_0 = 0
     wins_agent_1 = 0
