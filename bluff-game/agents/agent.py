@@ -52,8 +52,7 @@ class BaseAgent(ABC):
     def _index_to_action(self, index: int) -> list:
         """Convert index in Q-table to action."""
         return [index // 125, (index % 125) // 25, (index % 25) // 5, index % 5]
-    
-    
+
     def _get_state(self, observation: dict) -> tuple:
         """Convert observation into state tuple (cards_of_curr_rank, other_cards, current_rank)."""
         hand_freq = observation["hand"]

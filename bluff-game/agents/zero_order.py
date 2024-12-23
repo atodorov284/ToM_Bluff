@@ -22,8 +22,6 @@ class QLearningAgent(BaseAgent):
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
 
-
-
     def select_action(self, observation: dict, mask: list) -> list:
         """Select action using epsilon-greedy policy."""
         self.current_rank = observation["current_rank"]

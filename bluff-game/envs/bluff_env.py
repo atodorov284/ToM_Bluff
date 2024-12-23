@@ -128,7 +128,11 @@ class BluffEnv(AECEnv):
         """Return the current observation for the specified agent."""
         # Only one other agent for now, change later for 3 agents.
         previous_agent = self.last_played_agent
-        how_many_last_played = 0 if previous_agent is None else self.infos[previous_agent]["cards_other_agent_played"]
+        how_many_last_played = (
+            0
+            if previous_agent is None
+            else self.infos[previous_agent]["cards_other_agent_played"]
+        )
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),
@@ -148,13 +152,11 @@ class BluffEnv(AECEnv):
 
         self._validate_action(action)
 
-        
-
         if np.array_equal(action, ACTION_CHALLENGE):
             self._handle_challenge(agent)
         else:
             self._handle_play(agent, action)
-            
+
         if self.render_mode == "human":
             self.render(action)
 
@@ -162,19 +164,18 @@ class BluffEnv(AECEnv):
         self._cumulative_rewards[agent] += self.rewards[agent]
 
         if not self.terminations[agent]:
-            
             # Iterate agent selection once in any case
-                
+
             self.agent_selection = self._agent_selector.next()
-            
+
             # If challenger wins, they play again, so skip everyone internally
-            
+
             if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
                 for _ in range(self.num_players - 1):
                     self.agent_selection = self._agent_selector.next()
-            
+
             # LEGACY: This was the code for 2 agents
-            
+
             # self.agent_selection = self._agent_selector.next()
             # if np.array_equal(action, ACTION_CHALLENGE) and not self._is_truthful:
             #     self.agent_selection = self._agent_selector.next()
@@ -279,11 +280,11 @@ class BluffEnv(AECEnv):
         self.infos[agent]["cards_other_agent_played"] = 0
 
         # Check if the last play was truthful
-        
+
         is_truthful = all(
             card == RANKS[self.current_rank] for card in self.current_claim
         )
-        
+
         if is_truthful:
             # Challenger takes all cards in the central pile
             challenger_hand_list = self._frequency_vector_to_card_list(

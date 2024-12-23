@@ -6,7 +6,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
-from agents.first_order import FirstOrderAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
 
