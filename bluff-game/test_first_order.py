@@ -65,6 +65,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
             agent = agents[current_agent]
 
             if prev_rewards[current_agent] is not None:
+                print(f"Reward for {current_agent}: {prev_rewards[current_agent]}")
                 agent.update(prev_rewards[current_agent], obs)
 
             action = agent.select_action(obs, mask)

@@ -109,7 +109,5 @@ class FirstOrderAgent(BaseAgent):
                 self._challenging_belief = (1 - self.lr) * self._challenging_belief + self.lr
             else:
                 
-                self._challenging_belief = self.lr * self._challenging_belief
-        print(reward)
-                
+                self._challenging_belief = self.lr * self._challenging_belief                
                                 

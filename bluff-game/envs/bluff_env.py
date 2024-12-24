@@ -294,7 +294,7 @@ class BluffEnv(AECEnv):
             self.player_hands[agent] = self._list_to_frequency_vector(
                 challenger_hand_list
             )
-            self.rewards[agent] = len(self.central_pile)
+            self.rewards[agent] = -len(self.central_pile)
         else:
             # Last player takes all cards in the central pile
             last_player_hand_list = self._frequency_vector_to_card_list(
