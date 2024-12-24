@@ -24,20 +24,36 @@ class FirstOrderAgent(BaseAgent):
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
         
         self._challenging_belief = 0.5
+        
+    def _check_state_similarity(self, state_1: list, state_2: list) -> bool:
+        if state_1[2] != state_2[2]:
+            return False
+        
+        if state_1[3] != state_2[3]:
+            return False
+        
+        if state_1[5] != state_2[5]:
+            return False
+        
+        return True
+        
 
     def estimate_opponent_action(self, observation: dict) -> int:
         """Estimate the opponent's most likely action based on observation."""
         opponent_states = []
         for state, actions in self.q_table.items():
-            if state[3] == observation["cards_other_agent_played"]:
+            if self._check_state_similarity(state, observation):
                 opponent_states.append((state, actions))
         if not opponent_states:
             return None
         state_action_counts = defaultdict(int)
         for state, actions in opponent_states:
+            if all(actions == 0):
+                continue
             most_likely_action = np.argmax(actions)
             state_action_counts[most_likely_action] += 1
-        return max(state_action_counts, key=state_action_counts.get)
+            
+        return None if not state_action_counts else max(state_action_counts, key=state_action_counts.get)
 
     def select_action(self, observation: dict, mask: list) -> list:
         """
@@ -66,17 +82,17 @@ class FirstOrderAgent(BaseAgent):
 
         if state not in self.q_table:
             self.q_table[state] = np.zeros(self.NUM_ACTIONS)
-
-        # Estimate opponent's most likely action
-        opponent_action = self.estimate_opponent_action(observation)
+        
+        if 0 in valid_actions:
+            best_predicted_counteraction = self.estimate_opponent_action(state)
+            if best_predicted_counteraction == 0:
+                return self.ACTION_CHALLENGE
         
 
         if np.random.random() < self.epsilon:
             action = np.random.choice(valid_actions)
         else:
             q_values = deepcopy(self.q_table[state])
-            if opponent_action == 0 and self.ACTION_CHALLENGE in valid_actions:
-                q_values[0] *= (1 + self._challenging_belief)
             
             invalid_actions = [
                 i for i in range(self.NUM_ACTIONS) if i not in valid_actions

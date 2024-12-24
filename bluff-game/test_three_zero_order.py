@@ -17,9 +17,9 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_1 = QLearningAgent(learning_rate=0.05, discount_factor=1, epsilon=0.2)
-    agent_2 = QLearningAgent(learning_rate=0.1, discount_factor=0.95, epsilon=0.1)
-    agent_3 = QLearningAgent(learning_rate=0.15, discount_factor=1, epsilon=0.15)
+    agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.2)
+    agent_2 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.2)
+    agent_3 = QLearningAgent(learning_rate=0.1, discount_factor=1, epsilon=0.2)
 
     wins_agent_1 = 0
     wins_agent_2 = 0
