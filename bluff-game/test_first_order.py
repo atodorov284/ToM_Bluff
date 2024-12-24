@@ -9,28 +9,31 @@ from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 
+from utils import print_strategy_analysis
+
 
 def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:
     """Play a game of Bluff with the specified number of players."""
     random.seed(seed)
     np.random.seed(seed)
 
-    game_env = env(num_players=num_players, render_mode="human")
+    game_env = env(num_players=num_players, render_mode="huma")
 
     agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
-    agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_0 = 0
     wins_agent_1 = 0
 
     for episode in range(episodes):
-        should_swap = 0 # random.random() < 0.5
+        agents = [agent_0, agent_1]
 
-        agents = {
-            "player_0": agent_1 if should_swap else agent_0,
-            "player_1": agent_0 if should_swap else agent_1,
-        }
+        players = ["player_0", "player_1"]
+
+        np.random.shuffle(agents)
+
+        agents = dict(zip(players, agents))
 
         game_env.reset()
         obs, info = game_env.get_initial_observation()
@@ -55,6 +58,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
                 # Track wins for the actual agents
                 winning_agent = agents[game_env.agent_selection]
+                
 
                 if winning_agent == agent_0:
                     wins_agent_0 += 1
@@ -65,7 +69,6 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
             agent = agents[current_agent]
 
             if prev_rewards[current_agent] is not None:
-                print(f"Reward for {current_agent}: {prev_rewards[current_agent]}")
                 agent.update(prev_rewards[current_agent], obs)
 
             action = agent.select_action(obs, mask)
@@ -83,14 +86,18 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
             print(f"Episode {episode}")
             print(f"Agent 0 wins: {wins_agent_0}")
             print(f"Agent 1 wins: {wins_agent_1}")
-            print(f"Agent 0 played as player_0: {not should_swap}")
 
     return agent_0, agent_1, wins_agent_0, wins_agent_1
 
 
 if __name__ == "__main__":
-    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=200)
+    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=2000)
     print("\nFinal Results:")
     print(f"Agent 0 wins: {wins_0}")
     print(f"Agent 1 wins: {wins_1}")
     print(f"\nWin Rate Agent 1: {(wins_1 / (wins_0 + wins_1)) * 100:.1f}%")
+    
+    print_strategy_analysis(agent0.q_table)
+
+    # Print Q-table analysis for Agent 1
+    print_strategy_analysis(agent1.q_table)

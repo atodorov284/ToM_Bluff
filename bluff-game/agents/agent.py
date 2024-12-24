@@ -64,6 +64,15 @@ class BaseAgent(ABC):
         num_cards_other_agent_played = observation["cards_other_agent_played"]
 
         pile_size = observation["central_pile_size"]
+        
+        cards_in_other_agent_hand = observation["cards_in_other_agent_hand"]
+        
+        if cards_in_other_agent_hand < 3:
+            discrete_num_cards_other = 0
+        elif cards_in_other_agent_hand > 3 and cards_in_other_agent_hand < 7:
+            discrete_num_cards_other = 1
+        else:
+            discrete_num_cards_other = 2
 
         # discretize pile size
         if pile_size < 3:
@@ -79,6 +88,7 @@ class BaseAgent(ABC):
             current_rank,
             num_cards_other_agent_played,
             discrete_pile,
+            discrete_num_cards_other
         )
 
     def _convert_action_to_full(self, action: int, hand_freq: list) -> list:
