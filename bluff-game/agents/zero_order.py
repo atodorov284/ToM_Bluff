@@ -51,8 +51,11 @@ class QLearningAgent(BaseAgent):
 
         self.last_state = state
         self.last_action = action
+        
+        full_action = self._convert_action_to_full(action, hand_freq)
+        full_action = list(map(int, full_action))
 
-        return self._convert_action_to_full(action, hand_freq)
+        return full_action
 
     def update(self, reward: float, next_observation: dict = None) -> None:
         """Update Q-values using the Q-learning update rule."""
