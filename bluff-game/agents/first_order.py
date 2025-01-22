@@ -23,7 +23,6 @@ class FirstOrderAgent(BaseAgent):
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
         
-        self._challenging_belief = 0.5
         
     def _check_state_similarity(self, state_1: list, state_2: list) -> bool:
         if state_1[2] != state_2[2]:
@@ -105,7 +104,6 @@ class FirstOrderAgent(BaseAgent):
 
         full_action = self._convert_action_to_full(action, hand_freq)
         full_action = list(map(int, full_action))
-        print(full_action)
 
         return full_action
 
@@ -124,11 +122,5 @@ class FirstOrderAgent(BaseAgent):
 
         current_q = self.q_table[self.last_state][self.last_action]
         new_q = current_q + self.lr * (reward + self.gamma * next_max_q - current_q)
-        self.q_table[self.last_state][self.last_action] = new_q
-        if self.last_action == 0:  # Challenge action
-            if reward > 0:
-                self._challenging_belief = (1 - self.lr) * self._challenging_belief + self.lr
-            else:
-                
-                self._challenging_belief = self.lr * self._challenging_belief                
+        self.q_table[self.last_state][self.last_action] = new_q         
                                 
