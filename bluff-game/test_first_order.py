@@ -18,7 +18,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_0 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
@@ -75,6 +75,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
             game_env.step(action)
             next_obs, reward, termination, truncation, info = game_env.last()
+            
             mask = np.array(info["action_mask"])
 
             prev_rewards[current_agent] = reward
@@ -90,7 +91,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
 
 if __name__ == "__main__":
-    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=100)
+    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=10000)
     print("\nFinal Results:")
     print(f"Agent 0 wins: {wins_0}")
     print(f"Agent 1 wins: {wins_1}")

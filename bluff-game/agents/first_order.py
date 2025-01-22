@@ -53,6 +53,16 @@ class FirstOrderAgent(BaseAgent):
             state_action_counts[most_likely_action] += 1
             
         return None if not state_action_counts else max(state_action_counts, key=state_action_counts.get)
+    
+    
+    def to_bluff_or_not(self, q_values):
+        
+        action = np.argmax(q_values)
+        
+        if action >= 5:
+            opponent_observation =  
+        
+        
 
     def select_action(self, observation: dict, mask: list) -> list:
         """
@@ -82,10 +92,12 @@ class FirstOrderAgent(BaseAgent):
         if state not in self.q_table:
             self.q_table[state] = np.zeros(self.NUM_ACTIONS)
         
+        is_bluffing = False
+        
         if 0 in valid_actions:
             best_predicted_counteraction = self.estimate_opponent_action(state)
-            if best_predicted_counteraction == 0:
-                return self.ACTION_CHALLENGE
+            if best_predicted_counteraction is not None and best_predicted_counteraction >= 5:
+                is_bluffing = True
         
 
         if np.random.random() < self.epsilon:
@@ -93,10 +105,16 @@ class FirstOrderAgent(BaseAgent):
         else:
             q_values = deepcopy(self.q_table[state])
             
+            if is_bluffing:
+                q_values[0] *= 2
+            
             invalid_actions = [
                 i for i in range(self.NUM_ACTIONS) if i not in valid_actions
             ]
             q_values[invalid_actions] = -np.inf
+            
+            
+            
             action = np.argmax(q_values)
 
         self.last_state = state
