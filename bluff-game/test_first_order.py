@@ -10,6 +10,7 @@ from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
 from agents.first_order_dev import FirstOrderAgent1
+from agents.lala import FirstOrderAgent2
 
 
 def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:

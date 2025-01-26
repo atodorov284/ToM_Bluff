@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from agents.zero_order import QLearningAgent
 from copy import deepcopy
 from agents.agent import BaseAgent
+import math
 
 class FirstOrderAgent1(BaseAgent):
     def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.97, epsilon: float = 0.1):
@@ -22,6 +23,11 @@ class FirstOrderAgent1(BaseAgent):
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
         self.NUM_ACTIONS = 9  # challenge + 4 truth + 4 bluff
         
+        
+    def custom_round(self, number: int):
+        threshold = 0.8
+        return math.floor(number) if number < (math.floor(number) + threshold) else math.ceil(number)
+        
     def estimate_opponent_cards(self, observation: Dict) -> List[List[float]]:
         """
         Estimate probability distribution of opponent's cards based on observed game state.
@@ -39,7 +45,7 @@ class FirstOrderAgent1(BaseAgent):
         
         for i in range(4):
             if total_remaining > 0:
-                prob = round((remaining_cards[i] / total_remaining) * total_cards)
+                prob = self.custom_round((remaining_cards[i] / total_remaining) * total_cards)
             else:
                 prob = 0
             cards.append(prob)
@@ -77,7 +83,7 @@ class FirstOrderAgent1(BaseAgent):
         # Probability opponent has enough cards of current rank
         prob_has_cards = (opponent_cards[current_rank] >= cards_opp_played)
         
-        last_action = 0 if self.last_action is None else self.last_action
+        last_action = self.last_action
         
         opponent_observation = self.estimate_opponent_observation(last_action, observation, opponent_cards)
         
@@ -100,6 +106,11 @@ class FirstOrderAgent1(BaseAgent):
         
         # Combine evidence
         bluff_prob = (1 - prob_has_cards) * 0.8  # High weight on card probability
+        
+        if bluff_value >= truth_value:
+            return bluff_prob
+        
+        return 0
         
         if bluff_value >= truth_value:
             bluff_prob += 0.2  # Small weight on Q-value comparison
@@ -145,13 +156,14 @@ class FirstOrderAgent1(BaseAgent):
         # First decision: Challenge or play
         opponent_cards = self.estimate_opponent_cards(observation)
         
-        if observation['cards_other_agent_played'] > 0:
-            bluff_prob = self.estimate_opponent_bluff_probability(observation, opponent_cards)
+        # if observation['cards_other_agent_played'] > 0:
+        #     bluff_prob = self.estimate_opponent_bluff_probability(observation, opponent_cards)
             
-            # Challenge if high probability of bluff
-            if bluff_prob >= 0.7 and self.ACTION_CHALLENGE in mask:
-                self.last_action = 0
-                return self.ACTION_CHALLENGE
+        #     # Challenge if high probability of bluff
+        #     if bluff_prob >= 0.7 and self.ACTION_CHALLENGE in mask:
+        #         self.last_action = 0
+        #         return self.ACTION_CHALLENGE
+            
             
         #------------------------------------------------#
         # Predictive ToM

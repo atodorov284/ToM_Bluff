@@ -10,6 +10,7 @@ from agents.first_order import FirstOrderAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
 from agents.first_order_dev import FirstOrderAgent1
+from agents.lala import FirstOrderAgent2
 
 def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> None:
     """Play a game of Bluff with the specified number of players."""
@@ -18,8 +19,8 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_1 = FirstOrderAgent1(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
-    agent_2 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_1 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_2 = FirstOrderAgent1(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
     agent_3 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_1 = 0
