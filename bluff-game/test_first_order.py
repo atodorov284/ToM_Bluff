@@ -4,13 +4,12 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
-from agents.first_order import FirstOrderAgent
 from agents.random_agent import RandomAgent  # noqa: F401
-from agents.zero_order import QLearningAgent
+from agents.zero_order import ZeroOrderAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
-from agents.first_order_dev import FirstOrderAgent1
-from agents.lala import FirstOrderAgent2
+from agents.first_order_dev import FirstOrderAgent
+from agents.second_order import SecondOrderAgent
 
 
 def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:
@@ -20,9 +19,9 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_0 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
-    agent_1 = FirstOrderAgent1(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_0 = 0
     wins_agent_1 = 0

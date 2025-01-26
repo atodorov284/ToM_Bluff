@@ -5,7 +5,7 @@ import numpy as np
 from .agent import BaseAgent
 
 
-class QLearningAgent(BaseAgent):
+class ZeroOrderAgent(BaseAgent):
     def __init__(
         self,
         learning_rate: float = 0.1,

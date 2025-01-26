@@ -5,11 +5,13 @@ from copy import deepcopy
 from agents.agent import BaseAgent
 import math
 
-class FirstOrderAgent(BaseAgent):
+from agents.first_order_dev import FirstOrderAgent
+
+class SecondOrderAgent(BaseAgent):
     def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.97, epsilon: float = 0.1):
         """Initialize FirstOrderAgent with a model of opponent's behavior."""
         # Create internal model of opponent as a zero-order agent
-        self.opponent_model = ZeroOrderAgent(learning_rate, discount_factor, epsilon)
+        self.opponent_model = FirstOrderAgent(learning_rate, discount_factor, epsilon)
         
         # Initialize own learning parameters
         self.lr = learning_rate

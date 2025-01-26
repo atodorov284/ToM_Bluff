@@ -6,7 +6,7 @@ import numpy as np
 from agents.agent import BaseAgent
 
 
-class FirstOrderAgent(BaseAgent):
+class FirstOrderAgent1(BaseAgent):
     def __init__(
         self,
         learning_rate: float = 0.1,

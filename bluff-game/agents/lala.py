@@ -1,12 +1,12 @@
 import numpy as np
 from typing import Dict, List, Tuple
-from agents.zero_order import QLearningAgent
+from agents.zero_order import ZeroOrderAgent
 
 class FirstOrderAgent2:
     def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.97, epsilon: float = 0.1):
         """Initialize FirstOrderAgent with a model of opponent's behavior."""
         # Create internal model of opponent as a zero-order agent
-        self.opponent_model = QLearningAgent(learning_rate, discount_factor, epsilon)
+        self.opponent_model = ZeroOrderAgent(learning_rate, discount_factor, epsilon)
         
         # Initialize own learning parameters
         self.learning_rate = learning_rate
