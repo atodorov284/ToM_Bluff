@@ -60,7 +60,7 @@ class FirstOrderAgent(BaseAgent):
         action = np.argmax(q_values)
         
         if action >= 5:
-            opponent_observation =  
+            pass
         
         
 

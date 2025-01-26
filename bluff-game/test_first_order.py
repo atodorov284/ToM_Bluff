@@ -9,6 +9,7 @@ from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import QLearningAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
+from agents.first_order_dev import FirstOrderAgent1
 
 
 def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:
@@ -20,7 +21,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
     agent_0 = QLearningAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
-    agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_1 = FirstOrderAgent1(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_0 = 0
     wins_agent_1 = 0
