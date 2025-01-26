@@ -90,6 +90,16 @@ class BaseAgent(ABC):
             discrete_pile,
             discrete_num_cards_other
         )
+        
+    def _discretize_action(self, action: list) -> int:
+        if all(x == y for x, y in zip(action, self.ACTION_CHALLENGE)):
+            return 0
+        
+        if action[self.current_rank] == sum(action):
+            return sum(action)
+        
+        else:
+            return sum(action) + 4
 
     def _convert_action_to_full(self, action: int, hand_freq: list) -> list:
         """Convert action number to full action format.
