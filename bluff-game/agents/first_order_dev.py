@@ -36,9 +36,6 @@ class FirstOrderAgent(BaseAgent):
         total_cards = observation['cards_in_other_agent_hand']
         my_hand = observation['hand']
         
-        # Initialize probabilities for each rank
-        # We know total cards but not distribution
-        # Use simple uniform distribution as baseline
         cards = []
         remaining_cards = [4 - my_hand[i] for i in range(4)]  # 4 cards per rank initially
         total_remaining = sum(remaining_cards)
@@ -83,6 +80,7 @@ class FirstOrderAgent(BaseAgent):
         # Probability opponent has enough cards of current rank
         prob_has_cards = (opponent_cards[current_rank] >= cards_opp_played)
         
+        
         last_action = self.last_action
         
         opponent_observation = self.estimate_opponent_observation(last_action, observation, opponent_cards)
@@ -111,11 +109,6 @@ class FirstOrderAgent(BaseAgent):
             return bluff_prob
         
         return 0
-        
-        if bluff_value >= truth_value:
-            bluff_prob += 0.2  # Small weight on Q-value comparison
-            
-        return min(bluff_prob, 1.0)
     
     def categorize_action_index(self, action_index: int) -> int:
         if action_index == 0:
@@ -188,19 +181,19 @@ class FirstOrderAgent(BaseAgent):
             i for i in range(self.NUM_ACTIONS) if i not in valid_actions
         ]
         q_values[invalid_actions] = -np.inf
-        q_values[0] = -np.inf
+        if self.ACTION_CHALLENGE in mask:
+            q_values[0] = -np.inf
 
-        # action = np.argmax(q_values[1:5])
         
-        # sorted_q_values = sorted(q_values, reverse=True)
+        sorted_q_values = sorted(q_values, reverse=True)
         
-        # # loop through sorted q value and see if you 'win' an interaction
-        # for value in sorted_q_values:
-        #     action = q_values.tolist().index(value)
-        #     if action in valid_actions:
-        #         if self.wins_interaction(action, observation, opponent_cards, mask):
-        #             predictive = True
-        #             break
+        # loop through sorted q value and see if you 'win' an interaction
+        for value in sorted_q_values:
+            action = q_values.tolist().index(value)
+            if action in valid_actions:
+                if self.wins_interaction(action, observation, opponent_cards, mask):
+                    predictive = True
+                    break
             
         #------------------------------------------------#
         # Zero Order ToM

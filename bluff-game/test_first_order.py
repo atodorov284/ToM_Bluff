@@ -19,12 +19,13 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_0 = SecondOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_0 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_0 = 0
     wins_agent_1 = 0
+    
 
     for episode in range(episodes):
         agents = [agent_0, agent_1]
@@ -41,8 +42,14 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
         # Needed as you do not need to update in the first step, need both players to actually play something
         prev_rewards = {"player_0": None, "player_1": None}
+        
+        play = 0
 
         while True:
+            play += 1
+            if play >= 1000:
+                print("DRAW")
+                break
             current_agent = game_env.agent_selection
 
             if game_env.check_victory(current_agent):

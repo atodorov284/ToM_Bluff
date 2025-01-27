@@ -42,8 +42,12 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
         # Needed as you do not need to update in the first step, need both players to actually play something
 
         prev_rewards = {"player_0": None, "player_1": None, "player_2": None}
-
+        play = 0
         while True:
+            play += 1
+            if play >= 1000:
+                print("DRAW")
+                break
             current_agent = game_env.agent_selection
 
             if game_env.check_victory(current_agent):
@@ -98,7 +102,7 @@ if __name__ == "__main__":
     np.random.seed(1)
     random.seed(1)
     agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3 = (
-        play_bluff_game(num_players=3, episodes=10000)
+        play_bluff_game(num_players=3, episodes=2000)
     )
 
     print(f"Agent 1 wins: {wins_agent_1}")

@@ -2,10 +2,9 @@ import numpy as np
 from typing import Dict, List, Tuple
 from agents.zero_order import ZeroOrderAgent
 from copy import deepcopy
+from agents.first_order_dev import FirstOrderAgent
 from agents.agent import BaseAgent
 import math
-
-from agents.first_order_dev import FirstOrderAgent
 
 class SecondOrderAgent(BaseAgent):
     def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.97, epsilon: float = 0.1):
@@ -38,9 +37,6 @@ class SecondOrderAgent(BaseAgent):
         total_cards = observation['cards_in_other_agent_hand']
         my_hand = observation['hand']
         
-        # Initialize probabilities for each rank
-        # We know total cards but not distribution
-        # Use simple uniform distribution as baseline
         cards = []
         remaining_cards = [4 - my_hand[i] for i in range(4)]  # 4 cards per rank initially
         total_remaining = sum(remaining_cards)
@@ -51,7 +47,7 @@ class SecondOrderAgent(BaseAgent):
             else:
                 prob = 0
             cards.append(prob)
-            
+        
         return cards
     
     def estimate_opponent_observation(self, last_action: int, observation: Dict, opponent_cards: List[float]) -> Dict:
@@ -85,6 +81,7 @@ class SecondOrderAgent(BaseAgent):
         # Probability opponent has enough cards of current rank
         prob_has_cards = (opponent_cards[current_rank] >= cards_opp_played)
         
+        
         last_action = self.last_action
         
         opponent_observation = self.estimate_opponent_observation(last_action, observation, opponent_cards)
@@ -113,11 +110,6 @@ class SecondOrderAgent(BaseAgent):
             return bluff_prob
         
         return 0
-        
-        if bluff_value >= truth_value:
-            bluff_prob += 0.2  # Small weight on Q-value comparison
-            
-        return min(bluff_prob, 1.0)
     
     def categorize_action_index(self, action_index: int) -> int:
         if action_index == 0:
@@ -190,6 +182,9 @@ class SecondOrderAgent(BaseAgent):
             i for i in range(self.NUM_ACTIONS) if i not in valid_actions
         ]
         q_values[invalid_actions] = -np.inf
+        if self.ACTION_CHALLENGE in mask:
+            q_values[0] = -np.inf
+
         
         sorted_q_values = sorted(q_values, reverse=True)
         
