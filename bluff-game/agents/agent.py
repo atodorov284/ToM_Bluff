@@ -64,9 +64,9 @@ class BaseAgent(ABC):
         num_cards_other_agent_played = observation["cards_other_agent_played"]
 
         pile_size = observation["central_pile_size"]
-        
+
         cards_in_other_agent_hand = observation["cards_in_other_agent_hand"]
-        
+
         if cards_in_other_agent_hand < 3:
             discrete_num_cards_other = 0
         elif cards_in_other_agent_hand > 3 and cards_in_other_agent_hand < 7:
@@ -88,16 +88,16 @@ class BaseAgent(ABC):
             current_rank,
             num_cards_other_agent_played,
             discrete_pile,
-            discrete_num_cards_other
+            discrete_num_cards_other,
         )
-        
+
     def _discretize_action(self, action: list) -> int:
         if all(x == y for x, y in zip(action, self.ACTION_CHALLENGE)):
             return 0
-        
+
         if action[self.current_rank] == sum(action):
             return sum(action)
-        
+
         else:
             return sum(action) + 4
 

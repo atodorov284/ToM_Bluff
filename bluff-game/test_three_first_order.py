@@ -4,12 +4,11 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
+from agents.first_order_dev import FirstOrderAgent
 from agents.random_agent import RandomAgent  # noqa: F401
-from agents.zero_order import ZeroOrderAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
-from agents.first_order_dev import FirstOrderAgent
-from agents.second_order import SecondOrderAgent
+
 
 def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> None:
     """Play a game of Bluff with the specified number of players."""
@@ -19,12 +18,13 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
     game_env = env(num_players=num_players, render_mode="huma")
 
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
-    agent_2 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
-    agent_3 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_2 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_3 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_1 = 0
     wins_agent_2 = 0
     wins_agent_3 = 0
+    draws = 0
 
     for episode in range(episodes):
         agents = [agent_1, agent_2, agent_3]
@@ -46,7 +46,7 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
         while True:
             play += 1
             if play >= 1000:
-                print("DRAW")
+                draws += 1
                 break
             current_agent = game_env.agent_selection
 
@@ -94,6 +94,7 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
             print(f"Agent 1 wins: {wins_agent_1}")
             print(f"Agent 2 wins: {wins_agent_2}")
             print(f"Agent 3 wins: {wins_agent_3}")
+            print(f"Draws: {draws}")
 
     return agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3
 

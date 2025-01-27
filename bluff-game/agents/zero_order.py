@@ -51,7 +51,7 @@ class ZeroOrderAgent(BaseAgent):
 
         self.last_state = state
         self.last_action = action
-        
+
         full_action = self._convert_action_to_full(action, hand_freq)
         full_action = list(map(int, full_action))
 

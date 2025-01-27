@@ -133,9 +133,11 @@ class BluffEnv(AECEnv):
             if previous_agent is None
             else self.infos[previous_agent]["cards_other_agent_played"]
         )
-        
-        cards_in_other_agent_hand = ( 0 if previous_agent is None else sum(self.player_hands[previous_agent]))
-        
+
+        cards_in_other_agent_hand = (
+            0 if previous_agent is None else sum(self.player_hands[previous_agent])
+        )
+
         return {
             "current_rank": self.current_rank,
             "central_pile_size": len(self.central_pile),

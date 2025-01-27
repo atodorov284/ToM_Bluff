@@ -1,15 +1,11 @@
-import os
 import random
-import sys
-
 
 import numpy as np
+from agents.first_order_dev import FirstOrderAgent
 from agents.human import HumanAgent
 from agents.random_agent import RandomAgent  # noqa: F401
-from agents.zero_order import ZeroOrderAgent
 from envs.bluff_env import env
 from utils import print_strategy_analysis
-from agents.first_order_dev import FirstOrderAgent
 
 
 def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> None:
@@ -18,11 +14,11 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
     np.random.seed(seed)
 
     game_env = env(num_players=num_players, render_mode="huma")
-    
+
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.97, epsilon=0.1)
 
     agent_0 = HumanAgent()
-    
+
     wins_agent_0 = 0
     wins_agent_1 = 0
 
@@ -70,12 +66,10 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
                 agent.update(prev_rewards[current_agent], obs)
 
             action = agent.select_action(obs, mask)
-            
+
             game_env.step(action)
             next_obs, reward, termination, truncation, info = game_env.last()
             mask = np.array(info["action_mask"])
-            
-            
 
             prev_rewards[current_agent] = reward
 
