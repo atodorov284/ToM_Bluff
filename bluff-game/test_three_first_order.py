@@ -18,8 +18,8 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_1 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
-    agent_2 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_2 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
     agent_3 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     wins_agent_1 = 0

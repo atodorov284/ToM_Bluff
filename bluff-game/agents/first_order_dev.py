@@ -49,7 +49,7 @@ class FirstOrderAgent(BaseAgent):
             else:
                 prob = 0
             cards.append(prob)
-            
+        
         return cards
     
     def estimate_opponent_observation(self, last_action: int, observation: Dict, opponent_cards: List[float]) -> Dict:
@@ -188,16 +188,19 @@ class FirstOrderAgent(BaseAgent):
             i for i in range(self.NUM_ACTIONS) if i not in valid_actions
         ]
         q_values[invalid_actions] = -np.inf
+        q_values[0] = -np.inf
+
+        # action = np.argmax(q_values[1:5])
         
-        sorted_q_values = sorted(q_values, reverse=True)
+        # sorted_q_values = sorted(q_values, reverse=True)
         
-        # loop through sorted q value and see if you 'win' an interaction
-        for value in sorted_q_values:
-            action = q_values.tolist().index(value)
-            if action in valid_actions:
-                if self.wins_interaction(action, observation, opponent_cards, mask):
-                    predictive = True
-                    break
+        # # loop through sorted q value and see if you 'win' an interaction
+        # for value in sorted_q_values:
+        #     action = q_values.tolist().index(value)
+        #     if action in valid_actions:
+        #         if self.wins_interaction(action, observation, opponent_cards, mask):
+        #             predictive = True
+        #             break
             
         #------------------------------------------------#
         # Zero Order ToM

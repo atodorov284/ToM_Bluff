@@ -19,7 +19,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
     game_env = env(num_players=num_players, render_mode="huma")
 
-    agent_0 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_0 = SecondOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
 

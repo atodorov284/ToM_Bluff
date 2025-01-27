@@ -2,7 +2,7 @@ from typing import List, Dict
 from .agent import BaseAgent
 
 class HumanAgent(BaseAgent):
-    def _init_(self) -> None:
+    def __init__(self) -> None:
         """Initialize the Human Agent."""
         self.RANKS = ["ACE", "JACK", "QUEEN", "KING"]
         self.ACTION_CHALLENGE = [0, 0, 0, 0]
