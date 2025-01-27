@@ -12,6 +12,12 @@ class HumanAgent(BaseAgent):
         print("\n=== Current Game State ===")
         print(f"Current Rank: {self.RANKS[observation['current_rank']]}")
         print(f"Cards in central pile: {observation['central_pile_size']}")
+
+        # Print information about other player
+        if observation['cards_other_agent_played'] > 0:
+            print(f"Last play: Opponent played {observation['cards_other_agent_played']} cards")
+        else:
+            print("Last play: Opponent challenged")
         
         # Print hand in a readable format
         hand = observation['hand']
@@ -19,16 +25,13 @@ class HumanAgent(BaseAgent):
         for i, count in enumerate(hand):
             if count > 0:
                 print(f"{self.RANKS[i]}: {count}")
-        
-        # Print information about other player
-        if observation['cards_other_agent_played'] > 0:
-            print(f"Last play: Opponent played {observation['cards_other_agent_played']} cards")
+
 
     def _get_action_input(self) -> List[int]:
         """Get action input from the human player."""
-        print("\nEnter the number of cards you want to play for each rank.")
-        print("Enter 'c' or 'challenge' to challenge the previous play.")
-        print("Format: number of ACES JACKS QUEENS KINGS (e.g., '2 0 1 0' to play 2 ACES and 1 QUEEN)")
+        #print("\nEnter the number of cards you want to play for each rank.")
+        #print("Enter 'c' or 'challenge' to challenge the previous play.")
+        #print("Format: number of ACES JACKS QUEENS KINGS (e.g., '2 0 1 0' to play 2 ACES and 1 QUEEN)")
         
         while True:
             try:
@@ -90,3 +93,7 @@ class HumanAgent(BaseAgent):
     def update(self, reward: float, next_observation: Dict = None) -> None:
         """Display the reward to the human player."""
         pass
+
+
+    # print when new game starts, print what was the result of a challenge, 
+    # who picked up cards --> now cenral pile is empty
