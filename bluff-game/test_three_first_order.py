@@ -9,6 +9,9 @@ from agents.random_agent import RandomAgent  # noqa: F401
 from agents.zero_order import ZeroOrderAgent  # noqa: F401
 from envs.bluff_env import env
 from utils import print_strategy_analysis
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+
 
 
 def play_bluff_game(num_players: int = 3, episodes: int = 8) -> None:
@@ -18,7 +21,7 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8) -> None:
     
     agent_1 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
     agent_2 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
-    agent_3 = FirstOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
+    agent_3 = ZeroOrderAgent(learning_rate=0.1, discount_factor=0.99, epsilon=0.1)
     
     print(f"Configuration: {agent_1.__class__.__name__}, {agent_2.__class__.__name__}, {agent_3.__class__.__name__}")
 
@@ -90,12 +93,12 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8) -> None:
 
             obs = next_obs
 
-        # if episode % 10 == 0:
-        #     print(f"Episode {episode}")
-        #     print(f"Agent 1 wins: {wins_agent_1}")
-        #     print(f"Agent 2 wins: {wins_agent_2}")
-        #     print(f"Agent 3 wins: {wins_agent_3}")
-        #     print(f"Draws: {draws}")
+        if episode % 10 == 0:
+            print(f"Episode {episode}")
+            print(f"Agent 1 wins: {wins_agent_1}")
+            print(f"Agent 2 wins: {wins_agent_2}")
+            print(f"Agent 3 wins: {wins_agent_3}")
+            print(f"Draws: {draws}")
 
     return agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3, draws
 
@@ -103,6 +106,8 @@ def play_bluff_game(num_players: int = 3, episodes: int = 8) -> None:
 def run_experiment(num_runs: int = 50, episodes: int = 10000, seed: int = 1):
     random.seed(seed)
     np.random.seed(seed)
+    
+    start_time = time.time()
 
     agent_wins = {
         "wins_agent_1": [],
@@ -110,7 +115,7 @@ def run_experiment(num_runs: int = 50, episodes: int = 10000, seed: int = 1):
         "wins_agent_3": [],
         "draws": [],
     }
-
+    
     for _ in range(num_runs):
         agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3, draws = (
             play_bluff_game(num_players=3, episodes=episodes)
@@ -122,6 +127,30 @@ def run_experiment(num_runs: int = 50, episodes: int = 10000, seed: int = 1):
         agent_wins["draws"].append(draws)
 
 
+    # with ThreadPoolExecutor(max_workers=num_runs) as executor:
+    #     future_to_run = {
+    #         executor.submit(play_bluff_game, 3, episodes): run
+    #         for run in range(num_runs)
+    #     }    
+        
+    #     for future in as_completed(future_to_run):
+    #         try:
+    #             # Collect the results from the future
+    #             agent_1, agent_2, agent_3, wins_agent_1, wins_agent_2, wins_agent_3, draws = future.result()
+
+    #             agent_wins["wins_agent_1"].append(wins_agent_1)
+    #             agent_wins["wins_agent_2"].append(wins_agent_2)
+    #             agent_wins["wins_agent_3"].append(wins_agent_3)
+    #             agent_wins["draws"].append(draws)
+
+    #         except Exception as e:
+    #             print(f"Error processing run {future_to_run[future]}: {e}")
+    
+    
+    print(f"Raw data: {agent_wins}")
+    
+    print(f"Wall Time: {time.time() - start_time:.2f} seconds")
+    
     print(
         f"Agent 1 Mean Wins: {np.mean(agent_wins['wins_agent_1'])}, Std: {np.std(agent_wins['wins_agent_1'])}, SEM: {np.std(agent_wins['wins_agent_1']) / np.sqrt(num_runs)}"
     )
@@ -134,9 +163,6 @@ def run_experiment(num_runs: int = 50, episodes: int = 10000, seed: int = 1):
     
     print(f"Mean Draws: {np.mean(agent_wins['draws'])}, Std: {np.std(agent_wins['draws'])}, SEM: {np.std(agent_wins['draws']) / np.sqrt(num_runs)}")
 
-    print_strategy_analysis(agent_1.q_table)
-    print_strategy_analysis(agent_2.q_table)
-    print_strategy_analysis(agent_3.q_table)
 
 if __name__ == "__main__":
-    run_experiment(num_runs=100, episodes=10000, seed=1)
+    run_experiment(num_runs=25, episodes=2000, seed=1)

@@ -99,7 +99,7 @@ def play_bluff_game(num_players: int = 2, episodes: int = 8, seed: int = 1) -> N
 
 
 if __name__ == "__main__":
-    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=10000)
+    agent0, agent1, wins_0, wins_1 = play_bluff_game(num_players=2, episodes=2500, seed=3)
     print("\nFinal Results:")
     print(f"Agent 0 wins: {wins_0}")
     print(f"Agent 1 wins: {wins_1}")
